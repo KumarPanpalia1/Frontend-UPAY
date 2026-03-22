@@ -1,0 +1,1 @@
+import {useEffect,useState} from 'react'; import {fetchDonations} from '../services/donationService';\nexport default function useDonations(){ const [data,setData]=useState([]); useEffect(()=>{fetchDonations().then(r=>setData(r.data)).catch(console.error);},[]); return data; }

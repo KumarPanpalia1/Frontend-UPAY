@@ -1,0 +1,1 @@
+import {useEffect,useState} from 'react'; import {fetchExpenses} from '../services/expenseService';\nexport default function useExpenses(){ const [data,setData]=useState([]); useEffect(()=>{fetchExpenses().then(r=>setData(r.data)).catch(console.error);},[]); return data; }

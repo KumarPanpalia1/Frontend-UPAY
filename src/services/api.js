@@ -1,0 +1,1 @@
+import axios from 'axios';\nconst api=axios.create({ baseURL:'https://api.example.com', timeout:10000});\napi.interceptors.request.use(config=>config, error=>Promise.reject(error));\napi.interceptors.response.use(response=>response, error=>Promise.reject(error));\nexport default api;
