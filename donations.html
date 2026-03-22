@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donations — UPAY NGO Finance Portal</title>
+  <meta name="description" content="Manage donations for UPAY NGO — add, edit, search and filter donation records." />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">U</div>
+      <div class="sidebar-brand"><h1>UPAY NGO</h1><span>Finance Portal</span></div>
+    </div>
+    <div class="sidebar-role">
+      <span class="role-dot" id="sidebar-role-dot"></span>
+      <span class="role-text" id="sidebar-role-text">Loading…</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Menu</div>
+      <a href="dashboard.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="donations.html" class="nav-link"><span class="nav-icon">💝</span> Donations</a>
+      <a href="expenses.html"  class="nav-link"><span class="nav-icon">💸</span> Expenses</a>
+      <a href="fund-allocation.html" class="nav-link"><span class="nav-icon">📁</span> Fund Allocation</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebar-user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-user-name">Loading…</div>
+          <div class="user-email" id="sidebar-user-email"></div>
+        </div>
+      </div>
+      <button class="btn-logout">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-title">
+          <h2>Donations Management</h2>
+          <p>Track and manage all donation records</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date">📅 <span id="topbar-date"></span></div>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h2>💝 Donations</h2>
+          <p id="donation-count-label">Loading records…</p>
+        </div>
+        <div class="flex gap-8" data-role="admin">
+          <button class="btn btn-primary" id="btn-add-donation">➕ Add Donation</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-control" id="search-input" placeholder="Search donor, category…" />
+        </div>
+        <select class="form-control" id="filter-category" style="width:auto; min-width:150px;">
+          <option value="">All Categories</option>
+          <option>Education</option>
+          <option>Health</option>
+          <option>Infrastructure</option>
+          <option>Women Empowerment</option>
+          <option>Environment</option>
+          <option>Vocational Training</option>
+        </select>
+        <select class="form-control" id="filter-mode" style="width:auto; min-width:140px;">
+          <option value="">All Modes</option>
+          <option>Cash</option>
+          <option>UPI</option>
+          <option>Cheque</option>
+          <option>Bank Transfer</option>
+        </select>
+        <input type="date" class="form-control" id="filter-date-from" style="width:auto;" title="From date" />
+        <input type="date" class="form-control" id="filter-date-to" style="width:auto;" title="To date" />
+        <button class="btn btn-ghost btn-sm" id="btn-clear-filters">✕ Clear</button>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="table-wrapper" style="border:none;border-radius:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Donor Name</th>
+                <th>Amount</th>
+                <th>Payment Mode</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th data-role="admin">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="donations-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add / Edit Donation Modal -->
+<div class="modal-overlay" id="donation-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="donation-modal-title">Add Donation</div>
+      <button class="modal-close" id="donation-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="donation-form" novalidate>
+        <input type="hidden" id="donation-edit-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="d-donor">Donor Name <span>*</span></label>
+            <input type="text" id="d-donor" class="form-control" placeholder="e.g. Ramesh Agarwal" />
+            <div class="form-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="d-amount">Amount (₹) <span>*</span></label>
+            <input type="number" id="d-amount" class="form-control" placeholder="e.g. 10000" min="1" />
+            <div class="form-error"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="d-mode">Payment Mode <span>*</span></label>
+            <select id="d-mode" class="form-control">
+              <option value="">Select mode</option>
+              <option>Cash</option>
+              <option>UPI</option>
+              <option>Cheque</option>
+              <option>Bank Transfer</option>
+            </select>
+            <div class="form-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="d-category">Category <span>*</span></label>
+            <select id="d-category" class="form-control">
+              <option value="">Select category</option>
+              <option>Education</option>
+              <option>Health</option>
+              <option>Infrastructure</option>
+              <option>Women Empowerment</option>
+              <option>Environment</option>
+              <option>Vocational Training</option>
+            </select>
+            <div class="form-error"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="d-date">Date <span>*</span></label>
+          <input type="date" id="d-date" class="form-control" />
+          <div class="form-error"></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="donation-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="donation-modal-save">💾 Save Donation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title">⚠️ Delete Donation</div>
+      <button class="modal-close" id="delete-modal-close">✕</button>
+    </div>
+    <div class="modal-body" style="padding:28px 24px;">
+      <p style="color:var(--text-secondary); font-size:14px; line-height:1.6;">
+        Are you sure you want to delete this donation record? This action <strong>cannot be undone</strong>.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="delete-modal-cancel">Cancel</button>
+      <button class="btn btn-danger" id="delete-modal-confirm">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/donations.js"></script>
+</body>
+</html>

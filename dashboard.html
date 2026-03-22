@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — UPAY NGO Finance Portal</title>
+  <meta name="description" content="UPAY NGO Finance Dashboard — overview of donations, expenses, and fund allocation." />
+  <link rel="stylesheet" href="styles/main.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 22px 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+
+    .stat-card.blue::before   { background: linear-gradient(90deg, #4F46E5, #818CF8); }
+    .stat-card.red::before    { background: linear-gradient(90deg, #EF4444, #F87171); }
+    .stat-card.green::before  { background: linear-gradient(90deg, #10B981, #34D399); }
+    .stat-card.orange::before { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
+
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card.blue   .stat-icon { background: #EEF2FF; }
+    .stat-card.red    .stat-icon { background: #FEE2E2; }
+    .stat-card.green  .stat-icon { background: #D1FAE5; }
+    .stat-card.orange .stat-icon { background: #FEF3C7; }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .stat-change {
+      position: absolute;
+      top: 20px; right: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 100px;
+    }
+
+    .stat-change.up   { background: #D1FAE5; color: #065F46; }
+    .stat-change.down { background: #FEE2E2; color: #991B1B; }
+
+    /* Charts row */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .chart-container {
+      position: relative;
+    }
+
+    .chart-canvas-wrap {
+      padding: 0 4px 8px;
+    }
+
+    /* Recent transactions */
+    .amount-positive { color: var(--accent);  font-weight: 600; }
+    .amount-negative { color: var(--danger);  font-weight: 600; }
+
+    .tx-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .tx-type.donation { background: #EEF2FF; color: #3730A3; }
+    .tx-type.expense  { background: #FEE2E2; color: #991B1B; }
+
+    @media (max-width: 1100px) {
+      .summary-cards { grid-template-columns: repeat(2, 1fr); }
+      .charts-row    { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .summary-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- Sidebar Overlay (Mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">U</div>
+      <div class="sidebar-brand">
+        <h1>UPAY NGO</h1>
+        <span>Finance Portal</span>
+      </div>
+    </div>
+
+    <div class="sidebar-role">
+      <span class="role-dot" id="sidebar-role-dot"></span>
+      <span class="role-text" id="sidebar-role-text">Loading…</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Menu</div>
+      <a href="dashboard.html" class="nav-link">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="donations.html" class="nav-link">
+        <span class="nav-icon">💝</span> Donations
+      </a>
+      <a href="expenses.html" class="nav-link">
+        <span class="nav-icon">💸</span> Expenses
+      </a>
+      <a href="fund-allocation.html" class="nav-link">
+        <span class="nav-icon">📁</span> Fund Allocation
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebar-user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-user-name">Loading…</div>
+          <div class="user-email" id="sidebar-user-email"></div>
+        </div>
+      </div>
+      <button class="btn-logout">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-title">
+          <h2>Dashboard</h2>
+          <p>Welcome back! Here's your financial overview.</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date">📅 <span id="topbar-date"></span></div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="stat-card blue">
+          <div class="stat-icon">💝</div>
+          <div class="stat-value" id="stat-donations">—</div>
+          <div class="stat-label">Total Donations</div>
+          <span class="stat-change up" id="stat-donations-count"></span>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon">💸</div>
+          <div class="stat-value" id="stat-expenses">—</div>
+          <div class="stat-label">Total Expenses (Approved)</div>
+          <span class="stat-change down" id="stat-expenses-count"></span>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">💰</div>
+          <div class="stat-value" id="stat-balance">—</div>
+          <div class="stat-label">Available Balance</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon">📈</div>
+          <div class="stat-value" id="stat-util">—</div>
+          <div class="stat-label">Fund Utilization</div>
+          <span class="stat-change" id="stat-util-badge"></span>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+        <!-- Bar Chart -->
+        <div class="card chart-container">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📊 Monthly Overview</div>
+              <div class="card-subtitle">Donations vs Expenses — last 6 months</div>
+            </div>
+          </div>
+          <div class="card-body chart-canvas-wrap">
+            <canvas id="barChart" height="260"></canvas>
+          </div>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="card chart-container">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🥧 Fund Allocation</div>
+              <div class="card-subtitle">Allocation by project category</div>
+            </div>
+          </div>
+          <div class="card-body chart-canvas-wrap">
+            <canvas id="pieChart" height="240"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🕐 Recent Transactions</div>
+          <a href="donations.html" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="table-wrapper" style="border:none; border-radius:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tx-body">
+              <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:32px;">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  const session = authBoot();
+  if (!session) throw new Error('Not authenticated');
+
+  // ── Summary Cards ─────────────────────────────────────────
+  const summary = getSummary();
+
+  document.getElementById('stat-donations').textContent = formatCurrency(summary.totalDonations);
+  document.getElementById('stat-expenses').textContent  = formatCurrency(summary.totalExpenses);
+  document.getElementById('stat-balance').textContent   = formatCurrency(summary.balance);
+  document.getElementById('stat-util').textContent      = summary.utilPct + '%';
+
+  const donations = getData('DONATIONS') || [];
+  const expenses  = getData('EXPENSES')  || [];
+
+  document.getElementById('stat-donations-count').textContent = donations.length + ' entries';
+  document.getElementById('stat-expenses-count').textContent  = expenses.filter(e => e.status === 'Approved').length + ' approved';
+
+  const utilBadge = document.getElementById('stat-util-badge');
+  if (summary.utilPct >= 90) {
+    utilBadge.textContent = '🔴 High';
+    utilBadge.className   = 'stat-change down';
+  } else if (summary.utilPct >= 70) {
+    utilBadge.textContent = '🟡 Moderate';
+    utilBadge.className   = 'stat-change';
+    utilBadge.style.background = '#FEF3C7';
+    utilBadge.style.color = '#92400E';
+  } else {
+    utilBadge.textContent = '🟢 Healthy';
+    utilBadge.className   = 'stat-change up';
+  }
+
+  // ── Bar Chart ─────────────────────────────────────────────
+  const stats  = DEFAULT_MONTHLY_STATS;
+  const barCtx = document.getElementById('barChart').getContext('2d');
+
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: stats.map(s => s.month),
+      datasets: [
+        {
+          label: 'Donations',
+          data: stats.map(s => s.donations),
+          backgroundColor: 'rgba(79,70,229,0.85)',
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+        {
+          label: 'Expenses',
+          data: stats.map(s => s.expenses),
+          backgroundColor: 'rgba(16,185,129,0.85)',
+          borderRadius: 6,
+          borderSkipped: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 12 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ₹${ctx.raw.toLocaleString('en-IN')}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12 } } },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { font: { size: 12 }, callback: v => '₹' + (v/1000).toFixed(0) + 'K' }
+        }
+      }
+    }
+  });
+
+  // ── Pie Chart ─────────────────────────────────────────────
+  const projects  = getData('PROJECTS') || [];
+  const pieColors = ['#4F46E5','#10B981','#F59E0B','#EF4444','#3B82F6','#8B5CF6','#EC4899'];
+  const catMap    = {};
+  projects.forEach(p => {
+    catMap[p.category] = (catMap[p.category] || 0) + p.allocated;
+  });
+
+  const pieCtx = document.getElementById('pieChart').getContext('2d');
+  new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(catMap),
+      datasets: [{
+        data: Object.values(catMap),
+        backgroundColor: pieColors,
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 11 }, boxWidth: 8 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ₹${ctx.raw.toLocaleString('en-IN')}`
+          }
+        }
+      }
+    }
+  });
+
+  // ── Recent Transactions ────────────────────────────────────
+  (function buildRecentTx() {
+    const allDonations = (getData('DONATIONS') || []).map(d => ({
+      description: `Donation — ${d.donor}`,
+      type: 'donation',
+      category: d.category,
+      date: d.date,
+      amount: d.amount,
+    }));
+
+    const allExpenses = (getData('EXPENSES') || [])
+      .filter(e => e.status === 'Approved')
+      .map(e => ({
+        description: e.title,
+        type: 'expense',
+        category: e.category,
+        date: e.date,
+        amount: -e.amount,
+      }));
+
+    const combined = [...allDonations, ...allExpenses]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 10);
+
+    const tbody = document.getElementById('recent-tx-body');
+    if (!combined.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div><h3>No transactions</h3></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = combined.map((tx, i) => `
+      <tr>
+        <td class="td-muted">${String(i+1).padStart(2,'0')}</td>
+        <td class="fw-600">${tx.description}</td>
+        <td><span class="tx-type ${tx.type}">${tx.type === 'donation' ? '💝 Donation' : '💸 Expense'}</span></td>
+        <td>${tx.category}</td>
+        <td class="td-muted">${formatDate(tx.date)}</td>
+        <td class="${tx.amount >= 0 ? 'amount-positive' : 'amount-negative'}">
+          ${tx.amount >= 0 ? '+' : ''}${formatCurrency(Math.abs(tx.amount))}
+        </td>
+      </tr>
+    `).join('');
+  })();
+</script>
+</body>
+</html>
