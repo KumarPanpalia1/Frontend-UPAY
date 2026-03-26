@@ -18,6 +18,6 @@ export const loginUser = async ({ email, password, role }) => {
   };
 
   // --- REAL API (uncomment when backend is ready) ---
-  // const { data } = await api.post('/auth/login', { email, password, role });
-  // return data;
+  const { data } = await api.post('/auth/login', { email, password, role });
+  return data;
 };

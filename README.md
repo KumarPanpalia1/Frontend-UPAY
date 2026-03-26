@@ -1,16 +1,52 @@
-# React + Vite
+# UPAY Finance Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack finance management portal for UPAY NGO (Under Privileged Advancement by Youth).
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Frontend**: React + Vite, React Router v6, Chart.js (via react-chartjs-2), Axios
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB with Mongoose
+- **Auth**: JWT stored in localStorage
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Authentication**: Login with role-based access (Admin/Volunteer)
+- **Dashboard**: KPI cards, line chart, donut chart, recent activities
+- **Donations**: View, add, import from Excel, filter and search
+- **Expenses**: Submit, approve/reject (admin), track status
+- **Fund Allocation**: Allocate funds, track utilization, transactions
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+- Node.js
+- MongoDB
+- npm or yarn
+
+### Backend Setup
+
+```bash
+cd backend
+npm install
+# Set up MongoDB URI in .env
+npm run seed  # Seed database with sample data
+npm run dev   # Start server on port 5000
+```
+
+### Frontend Setup
+
+```bash
+npm install
+npm run dev  # Start on port 5173
+```
+
+### Login Credentials
+
+- **Admin**: admin@upay.org / admin123
+- **Volunteer**: volunteer@upay.org / vol123
+
+## Project Structure
+
+See src/ for frontend components, backend/ for server code.

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-// import * as donationService from '../services/donationService';
+import * as donationService from '../services/donationService';
 
 const MOCK_DONATIONS = [
   { id:1,  donorName:'Rahul Sharma',   amount:12000, mode:'UPI',    date:'2026-03-20', purpose:'Education' },
@@ -15,8 +15,9 @@ export const useDonations = () => {
   const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
-    setTimeout(() => { setDonations(MOCK_DONATIONS); setLoading(false); }, 400);
-    // Real: donationService.getAll().then(setDonations).finally(()=>setLoading(false));
+    // setTimeout(() => { setDonations(MOCK_DONATIONS); setLoading(false); }, 400);
+    // Real: 
+    donationService.fetchDonations().then(res => setDonations(res.data)).finally(() => setLoading(false));
   }, []);
 
   const addDonation = (record) => {
