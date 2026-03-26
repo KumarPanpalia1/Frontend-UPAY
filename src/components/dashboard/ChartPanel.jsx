@@ -1,1 +1,2 @@
-import React from 'react';\nexport default function ChartPanel(){ return <section>ChartPanel</section>; }
+import React from 'react';
+export default function ChartPanel(){ return <section>ChartPanel</section>; }
