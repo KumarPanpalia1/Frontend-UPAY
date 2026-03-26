@@ -18,9 +18,14 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <div>
-          <h1>Finance overview</h1>
-          <p>Welcome back, {user.name}</p>
+        <div className="dashboard-header-text">
+          <h1>Finance Overview</h1>
+          <p>Welcome back, {user?.name || 'Admin'}!</p>
+        </div>
+        <div className="dashboard-actions">
+          <button className="btn-primary" onClick={() => alert('Excel Import functionality to be integrated for Nagpur Expenses struct.')}>
+            + Import Excel
+          </button>
         </div>
       </div>
 
