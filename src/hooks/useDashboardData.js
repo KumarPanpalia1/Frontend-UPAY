@@ -16,10 +16,10 @@ const MOCK = {
     expenses: [18000,22000,25000,21000,28000,24000],
   },
   categories: [
-    { label: 'Education', value: 38, color: '#1D9E75' },
-    { label: 'Food',      value: 24, color: '#185FA5' },
-    { label: 'Medical',   value: 18, color: '#D85A30' },
-    { label: 'Transport', value: 12, color: '#BA7517' },
+    { label: 'Education', value: 38, color: '#003C64' },
+    { label: 'Food',      value: 24, color: '#F7AC2D' },
+    { label: 'Medical',   value: 18, color: '#005086' },
+    { label: 'Transport', value: 12, color: '#fcd34d' },
     { label: 'Admin',     value: 8,  color: '#888780' },
   ],
   recentDonations: [

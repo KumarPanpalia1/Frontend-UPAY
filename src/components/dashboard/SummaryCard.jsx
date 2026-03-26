@@ -1,16 +1,16 @@
 const colorMap = {
-  green: '#1D9E75',
-  coral: '#D85A30',
-  blue:  '#185FA5',
-  amber: '#BA7517',
+  green: '#003C64',   // primary
+  coral: '#F7AC2D',   // accent
+  blue:  '#005086',   // primary-light
+  amber: '#fcd34d',   // accent-light
   purple:'#534AB7',
   red:   '#E24B4A',
 };
 
 const trendColorMap = {
-  up:      '#1D9E75',
+  up:      '#003C64',
   down:    '#E24B4A',
-  warning: '#BA7517',
+  warning: '#F7AC2D',
   neutral: '#888780',
 };
 
